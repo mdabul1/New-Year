@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy New Year 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff512f;
+            --secondary: #dd2476;
+            --gold: #ffd700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0f0c29;
+            background: linear-gradient(to bottom, #24243e, #302b63, #0f0c29);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        /* Canvas for Fireworks */
+        #fireworksCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 40px 30px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--gold), #fff, var(--gold));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #e0e0e0;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1em;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 81, 47, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 81, 47, 0.6);
+        }
+
+        .share-btn {
+            background: #25D366; /* WhatsApp Color */
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .hidden { display: none; }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="fireworksCanvas"></canvas>
+
+<div class="card">
+    <div id="inputSection">
+        <h1>✨ 2026 ✨</h1>
+        <p>अपना नाम लिखकर जादू देखें!</p>
+        <div class="input-group">
+            <input type="text" id="userName" placeholder="आपका नाम यहाँ..." autocomplete="off">
+        </div>
+        <button id="submitBtn" onclick="showWish()">शुभकामनाएँ देखें 🎉</button>
+    </div>
+
+    <div id="wishSection" class="hidden">
+        <h1 id="nameText"></h1>
+        <p>
+            नया साल आपके जीवन में  
+            खुशियाँ, <br>
+            सफलता और अच्छी सेहत लेकर आए ।
+        </p>
+        
+        <div style="font-size: 3em; margin: 15px 0;">🎊</div>
+
+        <p style="font-weight: 600; color: var(--gold);">
+            Abul Makarim की तरफ से <br>
+            हार्दिक शुभकामनाएँ
+        </p>
+
+        <button class="share-btn" onclick="shareWhatsApp()">WhatsApp पर शेयर करें 📲</button>
+    </div>
+</div>
+
+<script>
+    // --- Google Apps Script Connection ---
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxNyTMOgc3SgDXtgCQEXlr6FpVTKr_zoAf0___lNEo6ModdnZ5mJWFwhY-brg9QS35e/exec";
+
+    // --- Fireworks Logic ---
+    const canvas = document.getElementById('fireworksCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.velocity = {
+                x: (Math.random() - 0.5) * 8,
+                y: (Math.random() - 0.5) * 8
+            };
+            this.alpha = 1;
+            this.friction = 0.95;
+        }
+        draw() {
+            ctx.globalAlpha = this.alpha;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+        }
+        update() {
+            this.velocity.x *= this.friction;
+            this.velocity.y *= this.friction;
+            this.x += this.velocity.x;
+            this.y += this.velocity.y;
+            this.alpha -= 0.01;
+        }
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        ctx.fillStyle = 'rgba(15, 12, 41, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        particles.forEach((p, i) => {
+            if (p.alpha > 0) {
+                p.update();
+                p.draw();
+            } else {
+                particles.splice(i, 1);
+            }
+        });
+    }
+    animate();
+
+    function createFirework() {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height * 0.5;
+        const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+        for (let i = 0; i < 30; i++) {
+            particles.push(new Particle(x, y, color));
+        }
+    }
+
+    // --- App Logic ---
+    function showWish() {
+        const nameInput = document.getElementById("userName");
+        const name = nameInput.value.trim();
+        const btn = document.getElementById("submitBtn");
+
+        if (!name) {
+            alert("कृपया अपना नाम लिखें! 😊");
+            return;
+        }
+
+        // Button Disable to prevent multiple clicks
+        btn.disabled = true;
+        btn.innerText = "लोड हो रहा है...";
+
+        // Send Data to Google Sheets
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `name=${encodeURIComponent(name)}`
+        })
+        .then(() => {
+            console.log("Data Saved Successfully");
+            displayWish(name);
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            // Even if sheet fails, show the wish to user
+            displayWish(name);
+        });
+    }
+
+    function displayWish(name) {
+        document.getElementById("inputSection").classList.add("hidden");
+        document.getElementById("wishSection").classList.remove("hidden");
+        document.getElementById("nameText").innerText = "🎉 " + name + " 🎉";
+
+        // Start fireworks loop
+        setInterval(createFirework, 500);
+    }
+
+    function shareWhatsApp() {
+        const name = document.getElementById("userName").value;
+        const text = `*${name}* ने आपके लिए एक खास सरप्राइज भेजा है! यहाँ क्लिक करें: ${window.location.href}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+</script>
+
+</body>
+</html>
